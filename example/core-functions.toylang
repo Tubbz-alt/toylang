@@ -1,0 +1,72 @@
+
+str = 'toyLang'
+name = ['d', 'p', 't', 'o', 'l', "e"]
+obj = {
+  d = 'p';
+  t = 'o';
+  l = 'e'
+}
+
+print('name =', name)
+print("type(name) =", type(name))
+print("length(name) =", length(name))
+print("contains(name, 'o') =", contains(name, 'o'))
+print('date =', date())
+
+obj2json(name, f cb(error, json) {
+  if(error) {
+    print('obj2json(name) #error', error)
+  } else {
+    print('obj2json(name) #success', json)
+    print('obj2json(name) #success type', type(json))
+    
+    json2obj(json, f cb(error, obj) {
+      if(error) {
+        print('json2obj(json) #error', error)
+      } else {
+        print('json2obj(json) #success', obj)
+        print('json2obj(json) #success type', type(obj))
+        print('json2obj(json) #success length', length(obj))
+      }
+      return T
+    })
+  }
+  return T
+})
+
+print('rand() =', rand())
+
+print('arr_push(name, "x") =', arr_push(name, "x"))
+print('name =', name)
+
+print('arr_sort(name) =', arr_sort(name))
+print('name =', name)
+
+print('arr_pop(name) =', arr_pop(name))
+print('name =', name)
+
+print('arr_replace(name, 2, 3, "xpto") =', arr_replace(name, 2, 3, "xpto"))
+print('name =', name)
+
+print('arr_remove(name, 2, 3) =', arr_remove(name, 2, 3))
+print('name =', name)
+
+print('obj =', obj)
+print('type(obj) =', type(obj))
+print('length(obj) =', length(obj))
+print('obj_keys(obj) =', obj_keys(obj))
+
+print('str_rand() =', str_rand())
+
+print('str =', str)
+print('str_starts_with(str, "toy") =', str_starts_with(str, "toy"))
+print('str_ends_with(str, "Lang") =', str_ends_with(str, "Lang"))
+print('str_slice(str, 1, 4) =', str_slice(str, 1, 4))
+print('str =', str)
+
+print('str_char2code("A") =', str_char2code("A"))
+print('str_code2char(66) =', str_code2char(66))
+print('str_repeat(">", 100) =', str_repeat(">", 100))
+print('str_index(str, "y") =', str_index(str, "y"))
+print('str_upper(str) =', str_upper(str))
+print('str_lower(str) =', str_lower(str))

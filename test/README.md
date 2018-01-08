@@ -9,74 +9,7 @@ Toylang
 
 My first toy language. Created exclusively for learning purposes.
 
-ABNF-like syntax
-================
-
-```
-chunk = [ exp ] *
-
-exp = [ assign | math_operation | func_call | func_def | primitive | variable ] [ ext_exp ] *
-
-assign = variable "=" exp
-
-variable = [ a-z ] + [ [ "-" ] ? [ _a-z0-9 ] + ] *
-
-math_operation = exp [ math_operator exp ] +
-
-math_operator = [ "-" | "+" | "*" | "/" ]
-
-func_call = variable func_call_args_chunk
-
-func_call_args_chunk = "(" [ func_call_args_list ] ? ")"
-
-func_call_args_list = exp [ "," exp ] *
-
-func_def = "f " variable "(" [ func_def_args_list ] ? ")" "{" func_def_chunk "}"
-
-func_def_args_list = variable [ "," variable ] *
-
-func_def_chunk = chunk func_def_return
-
-func_def_return = "return " exp
-
-primitive = [ number | string | boolean | array | object ]
-
-number = [ "+" | "-" ] ? [ 0-9 ] + [ "." [ 0-9 ] + ] ?
-
-string = [ "'" [ ALPHA ] + "'" ] | [ """ [ ALPHA ] + """ ]
-
-boolean = [ "T" | "F" ]
-
-array = "[" [ exp [ "," exp ] * ] ? "]"
-
-object = "{" [ variable "=" exp [ ";" variable "=" exp ] * ] ? "}"
-
-ext_exp = [ ext_object | ext_array | func_call_args_chunk ]
-
-ext_object = "." exp
-
-ext_array = "[" exp "]"
-
-decl = if
-
-if = "if" if_cond_block if_chunk_block [ else ] ?
-
-if_cond_block = "(" cond ")"
-
-cond = [ log_unary ] ? exp [ log_op exp ] *
-
-log_unary = "not"
-
-log_op = ">" | "<" | "==" | "!=" | ">=" | "<=" | "and" | "xor" | "or"
-
-if_chunk_block = "{" chunk "}"
-
-else = [ else_middle ] * else_end
-
-else_middle = "else" if_cond_block if_chunk_block
-
-else_end = "else" if_chunk_block
-```
+Tests folder.
 
 License
 =======

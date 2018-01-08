@@ -1,0 +1,22 @@
+
+array = [1,2,3,4,5,6,7,8,9]
+
+mapped = map(array, f f(item, index) {
+  return item * item
+})
+
+filtered = filter(array, f f(item, index) {
+  if(item > 5) {
+    return T
+  }
+  return F
+})
+
+reduced = reduce(array, f f(acc, item, index) {
+  return acc + item
+}, 0)
+
+print('array =', array)
+print('mapped =', mapped)
+print('filtered =', filtered)
+print('reduced =', reduced)

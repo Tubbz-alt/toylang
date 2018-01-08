@@ -9,11 +9,38 @@ Toylang
 
 My first toy language. Created exclusively for learning purposes.
 
+Example
+=======
+
+```javascript
+const toylang = require('@dptole/toylang')
+const ast = toylang.syntax.parse(`
+
+user-name = 'dptole'
+user-name-length = length(user-name)
+
+if(0 < user-name-length < 10) {
+  print('valid username length. its length is between 1 and 9')
+  print(user-name)
+} else {
+  print('invalid username')
+}
+
+`)
+
+const result = toylang.interpreter.parse(ast)
+// It will output
+// "valid username length. its length is between 1 and 9"
+// "dptole"
+```
+
+Click [here][example-url] to see more.
+
 ABNF-like syntax
 ================
 
 ```
-chunk = [ exp ] *
+chunk = [ exp | decl ] *
 
 exp = [ assign | math_operation | func_call | func_def | primitive | variable ] [ ext_exp ] *
 
@@ -92,4 +119,5 @@ License
 [npm-downloads-total-badge]: https://img.shields.io/npm/dt/@dptole/toylang.svg
 [saythanks-badge]: https://img.shields.io/badge/say%20thanks-%E3%83%84-44cc11.svg
 [saythanks-to]: https://saythanks.io/to/dptole
+[example-url]: https://github.com/dptole/toylang/blob/master/example
 [LICENSE]: LICENSE

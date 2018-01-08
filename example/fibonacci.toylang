@@ -1,0 +1,30 @@
+
+f fib(seq) {
+  if(seq < 1) {
+    return F
+  }
+
+  ref = {
+    seq = 0
+  }
+
+  f fib-iter(first, second, result) {
+    ref.seq = ref.seq + 1
+
+    if(ref.seq > seq) {
+      return result
+    }
+
+    result = first + second
+    first = second
+    second = result
+
+    print('seq (' + ref.seq + ')', '=', result)
+
+    return fib-iter(first, second, result)
+  }
+
+  return fib-iter(1, 0, 0)
+}
+
+fib(20)

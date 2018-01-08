@@ -1,0 +1,10 @@
+
+user-name = 'dptole'
+user-name-length = length(user-name)
+
+if(0 < user-name-length < 10) {
+  print('valid username length. its length is between 1 and 9')
+  print(user-name)
+} else {
+  print('invalid username')
+}

@@ -1,11 +1,11 @@
 
-const toylang = require('../index.js')
+const toylang = require('../../index.js')
     , should = require('should')
     , mocha = require('mocha')
     , it = mocha.it
     , describe = mocha.describe
 
-describe('#assign', function() {
+describe('#SYNTAX assign', function() {
   describe('variable = number', function() {
     it('should assign positive number to "variable"', function() {
       should.doesNotThrow(function() {
@@ -86,7 +86,7 @@ special-characters_variable = '~~ = tilde, equivalent to \
     })
   })
 
-  describe('#variable = array', function() {
+  describe('variable = array', function() {
     it('should assign empty array to "empty-array-variable"', function() {
       should.doesNotThrow(function() {
         toylang.syntax.parse('empty-array-variable = []')
@@ -98,9 +98,17 @@ special-characters_variable = '~~ = tilde, equivalent to \
         toylang.syntax.parse('populated-array-variable = [1,2,3,4]')
       })
     })
+
+    describe('variable = array[index]', function() {
+      it('should assign the first item of an array to "array-item-variable"', function() {
+        should.doesNotThrow(function() {
+          toylang.syntax.parse('array-item-variable = array[0]')
+        })
+      })
+    })
   })
 
-  describe('#variable = object', function() {
+  describe('variable = object', function() {
     it('should assign empty object to "empty-object-variable"', function() {
       should.doesNotThrow(function() {
         toylang.syntax.parse('empty-object-variable = {}')
@@ -110,6 +118,66 @@ special-characters_variable = '~~ = tilde, equivalent to \
     it('should assign populated object to "populated-object-variable"', function() {
       should.doesNotThrow(function() {
         toylang.syntax.parse('populated-object-variable = {first-key = 1; second-key = "two"; thrid_key = [1,2,3]; fourth-key={}}')
+      })
+    })
+
+    describe('variable = obj.property["computed"]', function() {
+      it('should assign an objects property to "objects-property-variable"', function() {
+        should.doesNotThrow(function() {
+          toylang.syntax.parse('objects-property-variable = obj.property')
+        })
+      })
+
+      it('should assign an objects computed property to "objects-computed-property-variable"', function() {
+        should.doesNotThrow(function() {
+          toylang.syntax.parse('objects-computed-property-variable = obj["computed"]')
+        })
+      })
+    })
+  })
+
+  describe('variable = func_def', function() {
+    it('should assign func_def to "variable-func-def"', function() {
+      should.doesNotThrow(function() {
+        toylang.syntax.parse('variable-func-def = f f() { return 1 }')
+      })
+    })
+  })
+
+  describe('variable = func_call', function() {
+    it('should assign func_call to "variable-func-call"', function() {
+      should.doesNotThrow(function() {
+        toylang.syntax.parse('variable-func-call = some-func()')
+      })
+    })
+
+    describe('variable = func_call.property.computed["x"](1,2,3)', function() {
+      it('should assign the result of a func_call of the result of another func_call to "result-variable"', function() {
+        should.doesNotThrow(function() {
+          toylang.syntax.parse('result-variable = some-func().property.computed["x"](1,2,3)')
+        })
+      })
+    })
+  })
+
+  describe('variable = another-variable', function() {
+    it('should assign "another-variable" to "variable"', function() {
+      should.doesNotThrow(function() {
+        toylang.syntax.parse('variable = another-variable')
+      })
+    })
+
+    describe('variable = another-variable.property.computed["x"](1,2,3)', function() {
+      it('should assign the result of a func_call of an object to "result-variable"', function() {
+        toylang.syntax.parse('result-variable = another-variable.property.computed["x"](1,2,3)')
+      })
+    })
+  })
+
+  describe('variable = math_operation', function() {
+    it('should assign the result of a math operation to "result"', function() {
+      should.doesNotThrow(function() {
+        toylang.syntax.parse('result = 1 / 2 * 3 + 4')
       })
     })
   })
