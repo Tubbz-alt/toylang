@@ -1,0 +1,38 @@
+#!/usr/bin/env node
+'use strict';
+
+const toylang = require('../toylang/')
+const fs = require('fs')
+const path = require('path')
+
+function main(mode, file) {
+  if(mode === 'ast')
+    return console.log(JSON.stringify(parseSyntax(file), 0, 2))
+  else if(mode === 'run')
+    return runFile(file)
+  else
+    return usage()
+}
+
+function parseSyntax(file) {
+  const filepath = path.resolve(file)
+  console.log('Parsing the syntax...', filepath)
+  return toylang.syntax.parse(fs.readFileSync(filepath, 'utf-8').toString())
+}
+
+function runFile(file) {
+  const filepath = path.resolve(file)
+  console.log('Running... ', filepath)
+  return toylang.run(filepath)
+}
+
+function usage() {
+  return console.log(`Usage:
+node toylang [ ast | run ] file.toylang  
+`)
+}
+
+if(process.argv.length !== 4)
+  usage()
+else
+  main(process.argv[2], process.argv[3])

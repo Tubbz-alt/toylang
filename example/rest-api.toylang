@@ -1,0 +1,317 @@
+
+users_file = './users.json'
+
+user_route_post = {
+  path = '/user';
+  method = 'POST';
+  id_invalid = f f(req) {
+    return contains(obj_keys(req.json), 'id')
+  };
+  handler = f f(req, callback) {
+    if(user_route_post.id_invalid(req)) {
+      return callback('{"error":"invalid"}', {}, 400)
+    } else {
+      req.json.id = str_rand() + '-' + str_rand()
+      return add_user(req.json, f success(json_user) {
+        callback(json_user, {}, 201)
+        return 0
+      }, f error(error) {
+        callback('{"error":"internal server error (db)"}', {}, 500)
+        return 0
+      })
+    }
+  }
+}
+
+user_route_get = {
+  path = '/user';
+  method = 'GET';
+  is_valid = f f(req) {
+    return contains(obj_keys(req.query), 'id')
+  };
+  handler = f f(req, callback) {
+    if(user_route_get.is_valid(req)) {
+      return get_user_by_id(req.query.id, f success(result) {
+        return obj2json(result.user, f f(error, json) {
+          if(error) {
+            return callback('{"error":"corrupted data"}', {}, 500)
+          } else {
+            return callback(json, {}, 200)
+          }
+        })
+      }, f error(error) {
+        return callback('{"error":"user not found"}', {}, 404)
+      })
+    } else {
+      return get_all_users(f success(users) {
+        return callback(users, {}, 200)
+      }, f error(error) {
+        return callback('{"error":"cannot read all users"}', {}, 500)
+      })
+    }
+  }
+}
+
+user_route_update = {
+  path = '/user';
+  method = 'PUT';
+  is_valid = f f(req) {
+    return contains(obj_keys(req.query), 'id')
+  };
+  handler = f f(req, callback) {
+    if(user_route_get.is_valid(req)) {
+      return update_user_by_id(req.query.id, req.json, f success(user) {
+        return obj2json(user, f f(error, json) {
+          if(error) {
+            return callback('{"error":"corrupted data"}', {}, 500)
+          } else {
+            return callback(json, {}, 200)
+          }
+        })
+      }, f error(error) {
+        return callback('{"error":"user not found"}', {}, 404)
+      })
+    } else {
+      return callback('{"error":"missing id"}', {}, 400)
+    }
+  }
+}
+
+user_route_delete = {
+  path = '/user';
+  method = 'DELETE';
+  is_valid = f f(req) {
+    return contains(obj_keys(req.query), 'id')
+  };
+  handler = f f(req, callback) {
+    if(user_route_get.is_valid(req)) {
+      return delete_user_by_id(req.query.id, f success(user) {
+        return obj2json(user, f f(error, json) {
+          if(error) {
+            return callback('{"error":"corrupted data"}', {}, 500)
+          } else {
+            return callback('', {}, 204)
+          }
+        })
+      }, f error(error) {
+        return callback('{"error":"user not found"}', {}, 404)
+      })
+    } else {
+      return callback('{"error":"missing id"}', {}, 400)
+    }
+  }
+}
+
+routes = [
+  user_route_get,
+  user_route_update,
+  user_route_delete,
+  user_route_post
+]
+
+f get_all_users(success_cb, error_cb) {
+  return load_users(f success(users) {
+    return obj2json(users, f f(error, json) {
+      if(error) {
+        return error_cb(error)
+      } else {
+        return success_cb(json)
+      }
+    })
+  }, f error(error) {
+    return print('error loading users file to add a new one', error)
+  })
+}
+  
+f create_file(path, data, callback) {
+  return file_write(path, data, callback)
+}
+
+f add_user(new_user, success_cb, error_cb) {
+  if(contains(obj_keys(new_user), 'id')) {
+    return load_users(f success(users) {
+      arr_push(users, new_user)
+
+      return obj2json(new_user, f f(error, new_user_json) {
+        if(error) {
+          return error_cb(error)
+        } else {
+          return obj2json(users, f f(error, json) {
+            if(error) {
+              return print('error converting users to json (add_user)', error)
+            } else {
+              return create_file(users_file, json, f f(error, result) {
+                if(error) {
+                  return error_cb(error)
+                } else {
+                  return success_cb(new_user_json)
+                }
+              })
+            }
+          })
+        }
+      })
+    }, f error(error) {
+      return print('error loading users file to add a new one', error)
+    })
+  } else {
+    return error_cb('missing parameter "id"')
+  }
+}
+
+f update_user_by_id(id, new_user_data, success_cb, error_cb) {
+  return get_user_by_id(id, f success(result) {
+    map(new_user_data, f f(value, key) {
+      return result.user[key] = value
+    })
+    
+    return load_users(f success(users) {
+      updated_list = arr_replace(users, result.index, 1, result.user)
+      
+      return obj2json(updated_list, f f(error, json) {
+        if(error) {
+          return error_cb(error)
+        } else {
+          return create_file(users_file, json, f f(error, r) {
+            if(error) {
+              print('error updating users file', error)
+              return error_cb(error)
+            } else {
+              return success_cb(result.user)
+            }
+          })
+        }
+      })
+    }, error_cb)
+  }, error_cb)
+}
+
+f delete_user_by_id(id, success_cb, error_cb) {
+  return get_user_by_id(id, f success(result) {
+    return load_users(f success(users) {
+      updated_list = arr_remove(users, result.index, 1)
+      
+      return obj2json(updated_list, f f(error, json) {
+        if(error) {
+          return error_cb(error)
+        } else {
+          return create_file(users_file, json, f f(error, r) {
+            if(error) {
+              print('error deleting user from file', error)
+              return error_cb(error)
+            } else {
+              return success_cb('')
+            }
+          })
+        }
+      })
+    }, error_cb)
+  }, error_cb)
+}
+
+f get_user_by_id(id, success_cb, error_cb) {
+  return load_users(f success(users) {
+    users_found = filter(map(users, f f(user, index) {
+      if(user.id == id) {
+        return {
+          user = user;
+          index = index
+        }
+      }
+      return F
+    }), f f(item, index) {
+      return item
+    })
+    
+    if(length(users_found) == 1) {
+      return success_cb(users_found[0])
+    } else {
+      return error_cb(F)
+    }
+  }, f error(error) {
+    return print('error loading users file to get one by id', error)
+  })
+}
+
+f load_users(success_cb, error_cb) {
+  return file_read(users_file, f f(error, result) {
+    if(error) {
+      return create_file(users_file, '[]', f f(error, result) {
+        if(error) {
+          print('error creating users file', error)
+          return error_cb(error)
+        } else {
+          return load_users(success_cb, error_cb)
+        }
+      })
+    } else {
+      return json2obj(result.data, f f(error, object) {
+        if(error) {
+          print('error reading the users file', error)
+          return error_cb(error)
+        } else {
+          return success_cb(object)
+        }
+      })
+    }
+  })
+}
+
+f handle_request(req, callback) {
+  route = get_matching_route(req.pathname, req.method)
+
+  if(route) {
+    return execute_route(route, req, callback)
+  } else {
+    return callback('{"error":"not implemented"}', {}, 501)
+  }
+}
+
+f get_matching_route(path, method) {
+  return reduce(routes, f f(acc, item, index) {
+    if(acc) {
+      return acc
+    } else(method == item.method and path == item.path) {
+      return item
+    }
+    return acc
+  }, F)
+}
+
+f execute_route(route, req, callback) {
+  return route.handler(req, callback)
+}
+
+f handle_route() {
+  return add_user(req.json, f success(new_user) {
+    return callback(new_user, {}, 201)
+  }, f error(error) {
+    return callback('{"error":"unable to create the user"}', {}, 500)
+  })
+}
+
+f start_server() {
+  return http_server({
+    request = {
+      onerror = f f(error, request) {
+        return print('request error', error)
+      };
+      reply = f f(req, callback) {
+        print(req.method, req.url)
+        return handle_request(req, callback)
+      }
+    };
+    server = {
+      oncreate = f f(options) {
+        return print('server is running at', options.server.port)
+      };
+      onerror = f f(error) {
+        return print('server error', error)
+      };
+      port = 2222
+    }
+  })
+}
+
+print('starting the server...')
+start_server()
